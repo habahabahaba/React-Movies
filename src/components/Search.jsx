@@ -1,9 +1,10 @@
 import React from 'react';
 import { useState } from 'react';
 
-export default function Search({ handleSearch }) {
+export default function Search({ handleSearch = Function.prototype }) {
   const [searchInput, setSearchInput] = useState('');
   const [searchType, setSearchType] = useState('');
+
   function handleSubmit(event) {
     event.preventDefault();
     handleSearch(searchInput.trim(), searchType);

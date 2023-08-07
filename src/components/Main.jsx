@@ -3,67 +3,55 @@ import React, { Component } from 'react';
 import Search from './Search';
 import MoviesList from './MoviesList';
 import Preloader from './Preloader';
+import { useState } from 'react';
 
 const omdbKey = import.meta.env.VITE_OMDb_KEY;
 
-export default class Main extends Component {
-  state = {
-    movies: [],
-    searchTerm: '',
-    searchType: '',
-    isLoading: false,
-    status: '',
-  };
+export default function Main() {
+  const [movies, setMovies] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchType, setSearchType] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState('');
 
-  handleSearch(input, type) {
-    this.setState({
-      isLoading: true,
-      status: '',
-      searchTerm: input,
-      searchType: type,
-    });
+  function handleSearch(input, type) {
+    setIsLoading(true);
+    setStatus('');
+    setSearchTerm(input);
+    setSearchType(type);
 
     fetch(
       `https://www.omdbapi.com/?apikey=${omdbKey}&s=${input}&type=${type}&page=1`
     )
       .then((response) => response.json())
       .then((data) => {
+        setIsLoading(false);
         if (data['Search']) {
-          this.setState({
-            movies: data['Search'],
-            searchTerm: input,
-            searchType: type,
-            isLoading: false,
-          });
+          setMovies(data['Search']);
         } else {
-          this.setState({
-            isloading: false,
-            status:
-              'Nothing was found, please, try different search parameters.',
-          });
+          setStatus(
+            'Nothing was found, please, try different search parameters.'
+          );
         }
       })
       .catch((err) => {
         console.error(err);
-        this.setState({ isLoading: false });
+        setIsLoading(false);
       });
   }
-  render() {
-    const { movies, searchTerm, isLoading, status } = this.state;
 
-    return (
-      <main className='container content'>
-        <Search handleSearch={this.handleSearch.bind(this)} />
-        {!searchTerm.length ? (
-          <h5>Please, use the search field above.</h5>
-        ) : status ? (
-          <h5>{status}</h5>
-        ) : !isLoading ? (
-          <MoviesList movies={movies} />
-        ) : (
-          <Preloader />
-        )}
-      </main>
-    );
-  }
+  return (
+    <main className='container content'>
+      <Search handleSearch={handleSearch} />
+      {!searchTerm.length ? (
+        <h5>Please, use the search field above.</h5>
+      ) : status ? (
+        <h5>{status}</h5>
+      ) : !isLoading ? (
+        <MoviesList movies={movies} />
+      ) : (
+        <Preloader />
+      )}
+    </main>
+  );
 }
